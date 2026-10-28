@@ -18,8 +18,22 @@ class Settings(BaseSettings):
     supabase_service_role_key: str = ""
 
     @property
+    def effective_supabase_url(self) -> str:
+        return (
+            self.supabase_url
+            or os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
+            or ""
+        )
+
+    @property
     def effective_anon_key(self) -> str:
-        return self.supabase_anon_key or self.supabase_publishable_key
+        return (
+            self.supabase_anon_key
+            or self.supabase_publishable_key
+            or os.environ.get("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY")
+            or os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+            or ""
+        )
 
     # Groq
     groq_api_key: str = ""

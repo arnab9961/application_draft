@@ -11,7 +11,7 @@ _bearer = HTTPBearer()
 
 def _get_supabase_auth_client():
     key = settings.effective_anon_key or settings.supabase_service_role_key
-    return create_client(settings.supabase_url, key)
+    return create_client(settings.effective_supabase_url, key)
 
 
 async def require_authorized_user(

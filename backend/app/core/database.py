@@ -10,7 +10,7 @@ def get_supabase() -> Client:
     if _supabase_client is None:
         key = settings.supabase_service_role_key or settings.effective_anon_key
         _supabase_client = create_client(
-            settings.supabase_url,
+            settings.effective_supabase_url,
             key,
         )
     return _supabase_client
