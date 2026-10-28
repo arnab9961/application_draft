@@ -59,11 +59,25 @@ async def upload_cv(
     ext = ALLOWED_TYPES[file.content_type]
     storage_path = f"{user['id']}/cv/{uuid.uuid4()}{ext}"
 
-    db.storage.from_("private-documents").upload(
-        path=storage_path,
-        file=content,
-        file_options={"content-type": file.content_type},
-    )
+    try:
+        db.storage.from_("private-documents").upload(
+            path=storage_path,
+            file=content,
+            file_options={"content-type": file.content_type},
+        )
+    except Exception:
+        try:
+            db.storage.create_bucket("private-documents", {"public": False})
+            db.storage.from_("private-documents").upload(
+                path=storage_path,
+                file=content,
+                file_options={"content-type": file.content_type},
+            )
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail="Storage bucket 'private-documents' not found. Please create a bucket named 'private-documents' in Supabase -> Storage.",
+            )
 
     # Check if this is the first CV (auto-set as default)
     existing = db.table("cv_documents").select("id").eq("user_id", user["id"]).execute()
