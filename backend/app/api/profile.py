@@ -10,7 +10,7 @@ router = APIRouter()
 @router.get("/")
 async def get_profile(user: dict = Depends(require_authorized_user)):
     db = get_supabase()
-    result = db.table("profiles").select("*").eq("user_id", user["id"]).execute()
+    result = db.table("job_profiles").select("*").eq("user_id", user["id"]).execute()
     if not result.data:
         return {}
     return result.data[0]
@@ -24,13 +24,13 @@ async def update_profile(
     data = {k: v for k, v in payload.model_dump().items() if v is not None}
     data["user_id"] = user["id"]
 
-    existing = db.table("profiles").select("id").eq("user_id", user["id"]).execute()
+    existing = db.table("job_profiles").select("id").eq("user_id", user["id"]).execute()
     if existing.data:
         result = (
-            db.table("profiles").update(data).eq("user_id", user["id"]).execute()
+            db.table("job_profiles").update(data).eq("user_id", user["id"]).execute()
         )
     else:
-        result = db.table("profiles").insert(data).execute()
+        result = db.table("job_profiles").insert(data).execute()
 
     if not result.data:
         raise HTTPException(status_code=500, detail="Failed to save profile")

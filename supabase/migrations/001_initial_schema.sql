@@ -6,8 +6,8 @@
 -- Enable UUID extension
 create extension if not exists "pgcrypto";
 
--- ─── profiles ────────────────────────────────────────────────
-create table if not exists public.profiles (
+-- ─── job_profiles ────────────────────────────────────────────
+create table if not exists public.job_profiles (
   id              uuid primary key default gen_random_uuid(),
   user_id         uuid not null references auth.users(id) on delete cascade,
   full_name       text,
@@ -29,17 +29,17 @@ create table if not exists public.profiles (
   preferred_arrangements jsonb default '[]'::jsonb,
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now(),
-  constraint profiles_user_id_unique unique (user_id)
+  constraint job_profiles_user_id_unique unique (user_id)
 );
 
-alter table public.profiles enable row level security;
+alter table public.job_profiles enable row level security;
 
-create policy "Owner only" on public.profiles
+create policy "Owner only" on public.job_profiles
   for all to authenticated
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
 
-create index if not exists profiles_user_id_idx on public.profiles(user_id);
+create index if not exists job_profiles_user_id_idx on public.job_profiles(user_id);
 
 -- ─── cv_documents ─────────────────────────────────────────────
 create table if not exists public.cv_documents (
@@ -219,7 +219,7 @@ begin
 end;
 $$;
 
-create trigger profiles_updated_at before update on public.profiles
+create trigger job_profiles_updated_at before update on public.job_profiles
   for each row execute function public.update_updated_at();
 
 create trigger cv_documents_updated_at before update on public.cv_documents

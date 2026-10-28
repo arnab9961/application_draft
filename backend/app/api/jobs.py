@@ -50,7 +50,7 @@ async def _process_job(application_id: str, user_id: str, raw_text: str, instruc
         ).eq("id", application_id).execute()
 
         # Get user profile and default CV
-        profile_result = db.table("profiles").select("*").eq("user_id", user_id).execute()
+        profile_result = db.table("job_profiles").select("*").eq("user_id", user_id).execute()
         profile = profile_result.data[0] if profile_result.data else {}
 
         cv_result = (
