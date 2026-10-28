@@ -1,5 +1,4 @@
 "use client";
-export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import api from "@/lib/api";
