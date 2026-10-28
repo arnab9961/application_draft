@@ -11,13 +11,23 @@ logger = logging.getLogger(__name__)
 
 
 def extract_text_from_pdf(content: bytes) -> str:
-    """Extract text from PDF using PyMuPDF."""
+    """Extract text from PDF using PyMuPDF, with pypdf fallback."""
     try:
         import fitz  # PyMuPDF
         doc = fitz.open(stream=content, filetype="pdf")
         pages = []
         for page in doc:
             pages.append(page.get_text())
+        text = "\n".join(pages).strip()
+        if text:
+            return text
+    except Exception as e:
+        logger.warning("PyMuPDF failed, trying pypdf: %s", e)
+
+    try:
+        import pypdf
+        reader = pypdf.PdfReader(io.BytesIO(content))
+        pages = [p.extract_text() or "" for p in reader.pages]
         return "\n".join(pages).strip()
     except Exception as exc:
         logger.error("PDF extraction failed: %s", exc)
@@ -39,7 +49,7 @@ def extract_text_from_docx(content: bytes) -> str:
 def extract_text_from_image(content: bytes) -> str:
     """
     Extract text from image using pytesseract OCR.
-    Falls back to returning an empty string with a warning if Tesseract is not installed.
+    Falls back gracefully if Tesseract binary is not installed on the server.
     """
     try:
         import pytesseract
@@ -47,12 +57,9 @@ def extract_text_from_image(content: bytes) -> str:
         image = Image.open(io.BytesIO(content))
         text = pytesseract.image_to_string(image)
         return text.strip()
-    except ImportError:
-        logger.warning("pytesseract not available — OCR skipped")
-        return ""
     except Exception as exc:
-        logger.error("Image OCR failed: %s", exc)
-        raise RuntimeError(f"Failed to OCR image: {exc}") from exc
+        logger.warning("Image OCR not available or failed on host (%s).", exc)
+        return ""
 
 
 def extract_text(content: bytes, filename: str) -> str:

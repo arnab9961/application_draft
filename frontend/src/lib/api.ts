@@ -2,7 +2,7 @@ import axios from "axios";
 import { createClient } from "./supabase";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "",
 });
 
 // Attach Supabase session token to every request
